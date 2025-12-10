@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+
+  // One-to-one: User -> Profile
+  profile   Profile?
+
+  // One-to-many: User -> Product (a user can have many products)
+  products  Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Profile{
+  id Int @id @default(autoincrement())
+  userId Int @unique
+  
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category{
+  id Int @id @default(autoincrement())
+  name String @unique
+  description String
+
+  // Many-to-many: Category <-> Product
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product{
+  id Int @id @default(autoincrement())
+  name String
+  description String
+  imageUrl String
+  videoUrl String
+  price Float
+
+  // Many-to-one: Product -> User (seller)
+  sellerId Int?
+  seller   User? @relation(fields: [sellerId], references: [id])
+
+  // Many-to-many: Product <-> Category
+  categories Category[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
